@@ -23,8 +23,16 @@ export class Database{
         fs.writeFile(databasePath, JSON.stringify(this.#database))
     }
 
-    select(table){
-        const data = this.#database[table] ?? []
+    select(table, search){
+        let data = this.#database[table] ?? []
+
+        if(search){
+            data = data.filter(row => {
+                return Object.entries(search).some(([key, value])=>{
+                    return row[key].toLowerCase().includes(value.toLowerCase())
+                })
+            })
+        }
 
         return data
     }
@@ -38,6 +46,51 @@ export class Database{
 
         this.#persist();
         return data;
+    }
+
+    delete(table,id){
+        const rowIndex = this.#database[table].findIndex(row => row.id == id)
+
+        if(rowIndex >-1){
+            this.#database[table].splice(rowIndex, 1)
+            this.#persist()
+        }
+    }
+
+    alterar(table, id, title, description){
+        const rowIndex = this.#database[table].findIndex(row => row.id == id)
+        const data = new Date()
+
+        if(rowIndex >-1){
+            if(!title){
+                this.#database[table][rowIndex].description = description
+                return this.#database[table][rowIndex].updated_at = data.toUTCString()
+            }
+            if(!description){
+                this.#database[table][rowIndex].title = title
+                return this.#database[table][rowIndex].updated_at = data.toUTCString()
+            }
+
+            this.#database[table][rowIndex].title = title
+            this.#database[table][rowIndex].description = description
+            this.#database[table][rowIndex].updated_at = data.toUTCString()
+            this.#persist()
+        }
+    }
+
+    completar(table,id){
+        const rowIndex = this.#database[table].findIndex(row => row.id == id)
+        const data = new Date()
+        
+        if(rowIndex >-1){
+            if(this.#database[table][rowIndex].completed_at){
+                return
+            }
+
+            this.#database[table][rowIndex].completed_at = true
+            this.#database[table][rowIndex].updated_at = data.toUTCString()
+
+        }
     }
     
 }
