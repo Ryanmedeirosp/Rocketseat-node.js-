@@ -2,6 +2,7 @@ import { Database } from "./database.js"
 import { randomUUID } from 'node:crypto'
 import { buildRoutePath } from "./utils/build-route-path.js"
 import path from "node:path"
+import { title } from "node:process"
 
 const databse = new Database()
 
@@ -14,8 +15,8 @@ export const routes =[
         const{search} = req.query
 
         const users = databse.select('task', search?{
-            name:search,
-            email:search,
+            title:search,
+            description:search,
         }:null)
 
         return res.end(JSON.stringify(users))
